@@ -11,8 +11,8 @@ public class StarWarApiTests extends BaseTest {
 
    //class variable since used across the class
    private  StarWarApi starWarApi;
-   protected String personPath = "people?search=";
-
+   private String personPath = "people?search=";
+   private String starshipPath = "/starships" ;
 
     @BeforeMethod
       public void beforeMethod()throws IOException{
@@ -63,9 +63,15 @@ public class StarWarApiTests extends BaseTest {
     @Test
     public void verifyStarshipAttributes(){
 
-        String starshipPath = "/starships" ;
+        List<Map<String,String>> results = starWarApi.getStartship(starshipPath);
 
-        Map<String,String> results = starWarApi.getStartship(starshipPath);
+        Map<String,String> resMap = results.get(0);
+        Assert.assertTrue(resMap.containsKey("name"));
+        Assert.assertTrue(resMap.containsKey("model"));
+        Assert.assertTrue(resMap.containsKey("crew"));
+        Assert.assertTrue(resMap.containsKey("hyperdrive_rating"));
+        Assert.assertTrue(resMap.containsKey("pilots"));
+        Assert.assertTrue(resMap.containsKey("films"));
 
     }
 
@@ -73,9 +79,29 @@ public class StarWarApiTests extends BaseTest {
     @Test
     public void verifyStarshipCount(){
 
-        String starshipCountPath = "starships/";
+        Map<String,Object> starShipData = starWarApi.getStartshipPaging(starshipPath);
+        int actualCount = (int) starShipData.get("count");
 
-        int count =starWarApi.getCountOfStarShipsSearch(starshipCountPath);
+        List<Map<String,String>> results = (List<Map<String, String>>) starShipData.get("results");
+        int currentCount = results.size();
+        String url = (String) starShipData.get("next");
+
+       int nextPage = 2;
+
+       while(url!=null){
+           Map<String,Object> nextStarshipData = starWarApi.getStartshipPaging(starshipPath+ "/?page=" + nextPage);
+           nextPage++;
+           List<Map<String,String>> nextresults = (List<Map<String, String>>) nextStarshipData.get("results");
+
+           int currentNextCount = nextresults.size();
+
+           url = (String) nextStarshipData.get("next");
+
+           currentCount = currentCount + currentNextCount;
+
+       }
+
+       Assert.assertEquals(currentCount,actualCount);
     }
 
 }

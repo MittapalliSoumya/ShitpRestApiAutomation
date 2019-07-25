@@ -5,7 +5,6 @@ import io.restassured.response.Response;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -102,19 +101,26 @@ public class StarWarApi {
      * @return map
      */
 
-    public Map<String, String> getStartship(String path){
+    public  List<Map<String,String>> getStartship(String path){
 
         Response res = restUtils.getRequest(path);
         ReadContext ctx = JsonPath.parse(res.getBody().asString());
 
         List<Map<String,String>> results = (List<Map<String, String>>) ctx.read("$..results",List.class).get(0);
-        Map<String,String> map = new HashMap<String,String>();
 
-         for(Map<String,String> x:results){
+        return results;
+    }
 
-         }
 
-        return map;
+    public  Map<String,Object> getStartshipPaging(String path){
+
+        Response res = restUtils.getRequest(path);
+        ReadContext ctx = JsonPath.parse(res.getBody().asString());
+
+        Map<String, Object> results = (Map<String, Object>) ctx.read("$",Map.class);
+
+        return results;
+
     }
 }
 
